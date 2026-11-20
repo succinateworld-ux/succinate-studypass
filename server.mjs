@@ -1,0 +1,7 @@
+import {createServer} from 'node:http';
+import {readFile} from 'node:fs/promises';
+const routes=new Map([['/',['index.html','text/html']],['/index.html',['index.html','text/html']],['/styles.css',['styles.css','text/css']],['/motion.css',['motion.css','text/css']],['/motion.mjs',['motion.mjs','text/javascript']],['/app.mjs',['app.mjs','text/javascript']],['/model.mjs',['model.mjs','text/javascript']]]);
+const port=Number(process.env.PORT||4180);
+for(const file of ['learning-data.mjs','learning-state.mjs','learning-app.mjs','metrics.mjs'])routes.set('/'+file,[file,'text/javascript']);
+routes.set('/learning.css',['learning.css','text/css']);
+createServer(async(req,res)=>{if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);res.end();return;}const file=routes.get(new URL(req.url,'http://localhost').pathname);if(!file){res.writeHead(404);res.end('Not found');return;}try{const data=await readFile(new URL('./dist/'+file[0],import.meta.url));res.writeHead(200,{'content-type':file[1]+'; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"});res.end(req.method==='HEAD'?undefined:data);}catch{res.writeHead(500);res.end('Unable to load page');}}).listen(port,'127.0.0.1',()=>console.log(`Local: http://127.0.0.1:${port}`));

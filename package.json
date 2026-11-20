@@ -1,0 +1,1 @@
+{"name":"succinate-studypass","version":"0.1.0","private":true,"type":"module","license":"MIT","description":"SuccinateWorld's Zcash-powered nursing education checkout — interactive UI prototype","scripts":{"start":"node server.mjs","test":"node --test"},"engines":{"node":">=22"}}
