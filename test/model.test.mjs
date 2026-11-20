@@ -1,0 +1,10 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {courses,priceZec,courseById,cleanLibrary,grantDemoPass,completeLesson} from '../dist/model.mjs';
+test('prices use exact integer zatoshis',()=>{assert.equal(priceZec(2500000),'0.025');assert.equal(priceZec(1),'0.00000001');assert.equal(priceZec(0),'0');assert.equal(priceZec(100000000),'1');assert.throws(()=>priceZec(-1));assert.throws(()=>priceZec(.1));});
+test('only known catalog resources can be unlocked',()=>{assert.throws(()=>grantDemoPass({},'unknown','DEMO-A'));assert.equal(courseById('__proto__'),null);assert.equal(courses.length,3);});
+test('granting a demo pass never creates a paid entitlement',()=>{const l=grantDemoPass({},'nclex','DEMO-ABC');assert.deepEqual(l.nclex,{demo:true,completed:[],receipt:'DEMO-ABC'});assert.equal(l.nclex.paid,undefined);});
+test('repeated unlock preserves completion and original receipt',()=>{const initial=completeLesson(grantDemoPass({},'nclex','DEMO-ABC'),'nclex',0);const next=grantDemoPass(initial,'nclex','DEMO-NEW');assert.deepEqual(next,initial);});
+test('unowned and unavailable lessons cannot be completed',()=>{assert.throws(()=>completeLesson({},'nclex',0));const l=grantDemoPass({},'nclex','DEMO-ABC');assert.throws(()=>completeLesson(l,'nclex',1));assert.throws(()=>completeLesson(l,'nclex',-1));});
+test('stored data is restricted to known demo resources and sample indexes',()=>{const data=JSON.parse('{"nclex":{"demo":true,"completed":[0,0,1,-1,"0"],"receipt":"<script>"},"fake":{"demo":true},"midwifery":{"demo":false},"__proto__":{"demo":true}}');assert.deepEqual(cleanLibrary(data),{nclex:{demo:true,completed:[0],receipt:'DEMO-RESTORED'}});assert.deepEqual(cleanLibrary(null),{});assert.deepEqual(cleanLibrary([]),{});});
+test('sample completion is idempotent and leaves other resources unchanged',()=>{const l=grantDemoPass(grantDemoPass({},'nclex','DEMO-A'),'midwifery','DEMO-B');const once=completeLesson(l,'nclex',0),twice=completeLesson(once,'nclex',0);assert.deepEqual(once,twice);assert.deepEqual(twice.midwifery.completed,[]);assert.deepEqual(l.nclex.completed,[]);});
