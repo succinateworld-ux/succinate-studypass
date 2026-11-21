@@ -1,90 +1,76 @@
 # Succinate StudyPass
 
-**Your next chapter, unlocked.** A free nursing-foundations study workspace, animated resource storefront, and optional Zcash checkout concept by SuccinateWorld.
+**Your next chapter, unlocked.** SuccinateWorld's free nursing-foundations workspace, with a server-backed Zcash testnet checkout implementation.
 
-The free learning tools work now: nine original starter lessons, twelve practice questions with explanations and unlimited retries, personal notes, a study planner, progress tracking, and backup export/restore. They require no account, wallet, or checkout. Expanded paid packs are still concepts; payments are simulated, no ZEC is sent, and no payment is verified. Catalog prices for those future packs are illustrative.
+**Live app: https://succinate-studypass.onrender.com. Merchant setup, hosted deployment, real invoice creation, payment broadcast, and receipt of the exact amount in the merchant wallet have been verified. CipherPay still reports pending with zero received; automatic gateway confirmation, workbook unlock, and receipt verification remain blocked. Do not send mainnet funds.** The public GitHub Pages version originally submitted was a simulated checkout prototype. Read [the payment integration record](docs/PAYMENTS.md) for exact scope and completion evidence.
 
-Click **Start free** or **My learning**. The learning loop is learn → practise → review mistakes → plan a return. The free version does not depend on completing a simulated payment. See [the free-tier guide](docs/FREE-TIER.md).
+## Use the free app
 
-## Open the preview
+Nine original starter lessons, twelve practice questions with explanations and unlimited retries, personal notes, a study planner, progress tracking, mistake review, and validated JSON backup/restore. No account, wallet, or checkout is required. Data stays in your browser unless you export it. Browser-local usage metrics have recording controls and CSV export; they are not global users, purchases, or revenue.
 
-Double-click **StudyPass-Preview.html**. It contains the complete UI, styles, and application code and requires no server or installation. The standalone file was opened and checked in Chrome.
+The source-linked introductory material is not an official exam question bank, clinical protocol, complete curriculum, or independently reviewed clinical course. No exam outcomes are promised. Expanded clinical packs remain planned and cannot be purchased.
 
-For development, install Node.js 22 or newer and run:
+## Hosted source package
+
+The root Dockerfile deploys the current v0.2 source in StudyPass-runtime.tar.gz. Extract that archive into an empty directory to inspect or run the hosted version; older static prototype files remain in this repository.
+
+```sh
+mkdir StudyPass-v02
+tar -xzf StudyPass-runtime.tar.gz -C StudyPass-v02
+cd StudyPass-v02
+```
+
+## Run
+
+Use Node.js 24 or newer. No package installation is needed.
 
 ```sh
 npm start
 ```
 
-Open http://127.0.0.1:4180. There are no package dependencies.
+Open http://127.0.0.1:4180. Without payment environment settings the free app works and checkout is explicitly unavailable. Windows PowerShell users with script execution restricted can run `npm.cmd start`.
 
 ```sh
 npm test
-node build-preview.mjs
+npm run build
 ```
 
-The second command rebuilds the self-contained HTML preview and the root `index.html` for static hosting from `dist/`. After editing source, regenerate those files to keep all versions consistent.
+Thirty-four automated tests cover the free workspace, local metrics, legacy demo-state handling, payment binding and encrypted capabilities, locked fulfillment, malformed provider data, underpayment, expiry, wrong network, refunds, and provider outages. Payment tests use an isolated stub gateway and do not prove an on-chain transaction. The builder parses and embeds the frontend into `StudyPass-Preview.html` and root `index.html`.
 
-## Experience
+You can open the standalone file for free learning. It cannot verify payments. The root `index.html` supports static hosting, including GitHub Pages; a static host cannot run the payment API.
 
-- Editorial hero with a custom CSS foil pass, pointer-responsive 3D rotation, moving reflections, orbital details, and floating status notes.
-- Midnight-blue, electric-violet, cyan, and warm-coral visual system, with original typography, illustrations, and course-cover artwork made in HTML/CSS/SVG.
-- Animated spectrum banner, component entrances, hover feedback, moving course covers, miniature process illustrations, and responsive layouts.
-- Orbital privacy diagram with a permanent shield outline, moving trace, three orbiting markers, rotating arcs, expanding ripples, and a light sweep.
-- A shared motion director registers the main page and dynamically created checkout/library/lesson components. Motion includes brief entrances and interaction feedback; body text stays still after entry. Offscreen sections and hidden browser tabs suspend continuous animation.
-- Filterable NCLEX-RN, midwifery, and public-health resource concepts.
-- Three-step demo checkout: order review → privacy review with explicit demo acknowledgement → simulated unlock.
-- Ungated free library with three foundation paths, lesson notes, completion tracking, repeatable practice, a mistake-review list, study tasks, and portable JSON backups.
-- A separate checkout preview and clearly labelled free-versus-planned-paid comparison. A paid expansion is not required to keep using the free starter tools.
-- Mobile navigation with learning-library access; native dialogs, focus outlines, keyboard dismissal, reduced-motion support, and an explicit pause-motion control.
-- No third-party scripts, remote assets, remote analytics, payment requests, sign-in, or API keys. Browser-local usage counters are available through **Usage metrics** in the footer, with pause/clear controls and CSV export; see [metric definitions and limits](docs/METRICS.md).
+## Zcash testnet checkout
 
-All downloaded receipts explicitly state `demo: true`, `paymentSent: false`, and `paymentVerified: false`. Browser-local unlocks are demonstrations, **not secure production entitlements**. A visitor can modify browser storage or inspect source. Do not use this implementation to protect paid course content.
+[Setup, architecture, limitations, and completion evidence](docs/PAYMENTS.md).
 
-## Design references
+The optional **Focus Workbook** is an actual original planning resource with a seven-session planner, reasoning journal, mistake-review guide, and weekly reflection. The server requests a $1 USD quote converted to test ZEC. Testnet coins have no monetary value; this is not a real-money sale. The workbook is MIT licensed and included in the repository for audit, so it is not commercially exclusive content or DRM.
 
-The user requested online examples as design guides. Research and the original design rationale are documented in [docs/DESIGN.md](docs/DESIGN.md). The interface is original; no reference-site code, images, logos, customer claims, testimonials, or product statistics were copied.
+The server creates an invoice through the merchant's configured CipherPay testnet API. An encrypted order key binds its product, destination, memo, integer amount, network, and invoice. Each status/download request reads the invoice again. Only a fully paid, confirmed invoice with a valid transaction ID and confirmation timestamp can download the workbook or testnet receipt. Detection alone, browser storage edits, and client-provided prices never grant access. Underpayments require merchant review, not resending the full request. Mainnet configuration is rejected.
 
-## Verification
+Configure the ignored `.env` from [.env.example](.env.example), or use your host's secret environment settings. Never commit credentials. StudyPass does not need a seed phrase, spending key, or viewing key. The gateway's merchant setup may require a UFVK; sharing that read-only payment visibility requires the wallet owner's deliberate setup.
 
-See [docs/VALIDATION.md](docs/VALIDATION.md). Sixteen tests cover ungated completion of all free lessons, unlimited retries with bounded saved history, mistake correction, notes/tasks/progress backup round trips, rejection of malformed data, and local metric counts and reporting windows. The free lesson, notes, completion, practice feedback, planner, reload persistence, backup download, and clean restore were checked in Chrome. Desktop and 400-pixel responsive views were inspected.
+A Node host with HTTPS, server secrets, and outbound HTTPS is required. [render.yaml](render.yaml) is a deployment blueprint, not a claim that a backend is deployed. Hosted gateway compatibility, real wallet interoperability, actual blockchain confirmation, and live fulfillment remain unverified. Verification trusts the gateway's scanner and confirmation policy; StudyPass does not independently run a Zcash node or detect reorganizations.
 
-## Hackathon review
+## Design and privacy
 
-Read [the submission overview and demo walkthrough](docs/SUBMISSION.md). This entry is a working free-learning app and a Zcash checkout UX prototype. It does not yet integrate a Zcash wallet or verify blockchain payments. The intended paid flow and the work needed to make it real are described below; they are not shipped capabilities.
+Original midnight-blue, violet, cyan, and coral interface with CSS/SVG pass artwork, orbital shield animation, component entrances and interaction feedback, offscreen suspension, a motion pause control, and reduced-motion support. References and design rationale are in [DESIGN.md](docs/DESIGN.md).
 
-The source-linked nursing foundations are original educational adaptations, not official exam questions, comprehensive test-plan coverage, clinical protocols, or an independently reviewed curriculum. WHO and NCSBN sources were checked on November 18, 2026. SuccinateWorld should review this starter material before using it as a public clinical education offering.
+Free learning data and local metrics stay in this browser. The payment server talks to the gateway; the merchant and gateway can associate an invoice with a payment, and hosting/network providers can observe metadata. The order key is a private bearer credential stored in the current tab; its private backup supports restore. It expires after 30 days and depends on provider invoice retention. No account-based recovery is implemented. No seed/spending keys are ever requested.
 
-## Production work still required
+## Project files
 
-1. Confirm actual resources, content rights, availability, ZEC prices, and access terms with SuccinateWorld.
-2. Configure a merchant-controlled Zcash receiving wallet and a supported shielded payment-request flow.
-3. Generate orders and references on the server; verify received amount, currency, destination, order binding, confirmations, duplicates, expiry, and reorg handling through authenticated merchant wallet infrastructure.
-4. Issue access only after server-side confirmation. Use durable orders and entitlements, protected resource delivery, appropriate recovery, and refund handling.
-5. Document the application privacy model: shielded transfers do not hide an order from its merchant, and hosting/network metadata remains relevant.
-6. Test with supported Zcash wallets and a controlled test network before enabling real payments. No Ethereum wallet connection or unsupported WalletConnect claims should be added for appearance.
-7. Complete accessibility, real-device, and security review; publish the new MIT-licensed repository, record the demo, and submit before the confirmed bounty deadline.
+- `dist/`: free learning app, checkout client, animation and styles.
+- `server.mjs`: allowlisted static files and private payment API.
+- `payments.mjs`: CipherPay adapter, quote binding, encrypted order keys, verification.
+- `resources/focus-workbook.md`: actual fulfillment document; not served as a public app asset.
+- `test/`: 33 automated checks; gateway fixtures are test-only.
+- `build-preview.mjs`: self-contained static preview generator.
+- `docs/`: product notes, historical QA, original submission, payment setup and verification status.
 
-## Files
+## Hackathon status
 
-```text
-dist/index.html       Main presentation, navigation, and dialog containers
-dist/styles.css       Responsive visual and motion system
-dist/motion.css       Spectrum palette refinements and decorative animation
-dist/motion.mjs       Component entrances, motion coverage audit, visibility suspension
-dist/learning-data.mjs Nine free lessons, twelve original questions, source references
-dist/learning-state.mjs Validated notes, progress, practice, planner and backup operations
-dist/learning-app.mjs Free learning workspace and reading/practice/planner screens
-dist/learning.css     Responsive free workspace, starter section and plan comparison
-dist/app.mjs          Filtering, demo checkout, dialogs, progress, motion
-dist/model.mjs        Catalog, integer pricing, validated demo-state changes
-server.mjs            Localhost server with an asset allowlist
-build-preview.mjs     Generates the standalone HTML
-StudyPass-Preview.html Complete portable preview
-test/model.test.mjs   State validation, pricing, unlock and access regression checks
-docs/                 Design rationale, validation, and submission direction
-```
+The original early-stage entry was posted to the Zcash India Telegram group with payment simulation explicitly disclosed. That sending is recorded in [SUBMISSION-RECORD.md](docs/SUBMISSION-RECORD.md); organizer acceptance and prize eligibility have not been confirmed. The new payment implementation must not be announced as complete until real testnet evidence exists. The old [submission write-up](docs/SUBMISSION.md) describes the originally submitted version; current integration status is [PAYMENTS.md](docs/PAYMENTS.md).
 
 ## License
 
-MIT. Proposed visual identity and catalog concepts are for SuccinateWorld's review. No examination body or Zcash organization endorsement is implied.
+MIT. No examination body, payment provider, or Zcash organization endorsement is implied.
